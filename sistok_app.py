@@ -1105,15 +1105,15 @@ elif menu == 'Analysis':
                     # Filter data untuk grafik (tanpa baris Jumlah)
                     chart_data = tangkapan_pivot[tangkapan_pivot['jenis_api'] != 'Jumlah'].copy()
                     
-                    # Ambil top 5 jika opsi dipilih
+                    # Konversi string ke float untuk kolom Total terlebih dahulu
+                    chart_data['Total_num'] = chart_data['Total'].apply(lambda x: float(x.replace(',', '')) if isinstance(x, str) else x)
+                    
+                    # PERBAIKAN: Lakukan sorting dan filter berdasarkan Total_num, bukan Total
                     if show_top and len(chart_data) > 5:
-                        chart_data = chart_data.sort_values(by='Total', ascending=False).head(5)
+                        chart_data = chart_data.sort_values(by='Total_num', ascending=False).head(5)
                         top_note = True
                     else:
                         top_note = False
-                    
-                    # Konversi string ke float untuk kolom Total
-                    chart_data['Total_num'] = chart_data['Total'].apply(lambda x: float(x.replace(',', '')) if isinstance(x, str) else x)
                     
                     # Membuat grafik batang hasil tangkapan dengan tampilan lebih baik
                     fig_tangkapan_total = px.bar(
@@ -1167,7 +1167,7 @@ elif menu == 'Analysis':
                     # Tambahkan grafik pie chart untuk distribusi
                     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
                     
-                    # Gabungkan kategori kecil jika terlalu banyak
+                    # PERBAIKAN: Gunakan pie_data yang sudah difilter dengan nilai numerik untuk pie chart
                     pie_data = chart_data.copy()
                     if len(pie_data) > 7 and not show_top:
                         # Ambil top 6, gabungkan sisanya sebagai "Lainnya"
@@ -1206,7 +1206,7 @@ elif menu == 'Analysis':
                 
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Tab 2: Jumlah Trip per Alat Tangkap
+       # Tab 2: Jumlah Trip per Alat Tangkap
         with tab_trip:
             st.markdown('<div class="tab-content">', unsafe_allow_html=True)
             
@@ -1308,15 +1308,15 @@ elif menu == 'Analysis':
                     # Filter data untuk grafik (tanpa baris Jumlah)
                     chart_data = effort_pivot[effort_pivot['jenis_api'] != 'Jumlah'].copy()
                     
-                    # Ambil top 5 jika opsi dipilih
+                    # PERBAIKAN: Konversi string ke float untuk kolom Total TERLEBIH DAHULU
+                    chart_data['Total_num'] = chart_data['Total'].apply(lambda x: float(x.replace(',', '')) if isinstance(x, str) else x)
+                    
+                    # PERBAIKAN: Lalu ambil top 5 jika opsi dipilih berdasarkan nilai numerik
                     if show_top_trip and len(chart_data) > 5:
-                        chart_data = chart_data.sort_values(by='Total', ascending=False).head(5)
+                        chart_data = chart_data.sort_values(by='Total_num', ascending=False).head(5)
                         top_trip_note = True
                     else:
                         top_trip_note = False
-                    
-                    # Konversi string ke float untuk kolom Total
-                    chart_data['Total_num'] = chart_data['Total'].apply(lambda x: float(x.replace(',', '')) if isinstance(x, str) else x)
                     
                     # Membuat grafik batang jumlah trip dengan tampilan lebih baik
                     fig_trip_per_alat = px.bar(
@@ -1370,10 +1370,10 @@ elif menu == 'Analysis':
                     # Tambahkan grafik pie chart untuk distribusi
                     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
                     
-                    # Gabungkan kategori kecil jika terlalu banyak
+                    # PERBAIKAN: Gunakan data yang sudah difilter dengan benar untuk pie chart
                     pie_data_trip = chart_data.copy()
                     if len(pie_data_trip) > 7 and not show_top_trip:
-                        # Ambil top 6, gabungkan sisanya sebagai "Lainnya"
+                        # Ambil top 6, gabungkan sisanya sebagai "Lainnya" berdasarkan nilai numerik
                         pie_top = pie_data_trip.nlargest(6, 'Total_num')
                         pie_others = pd.DataFrame({
                             'jenis_api': ['Lainnya'],
